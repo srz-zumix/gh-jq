@@ -15,6 +15,10 @@ func runRoot(args []string, stdin string) (string, error) {
 	rootCmd.SetOut(&outBuf)
 	rootCmd.SetIn(strings.NewReader(stdin))
 	rootCmd.SetArgs(args)
+	saveFlag = false
+	loadFlag = false
+	rootCmd.Flags().Lookup("save").Changed = false
+	rootCmd.Flags().Lookup("load").Changed = false
 	err := rootCmd.Execute()
 	return outBuf.String(), err
 }
@@ -61,5 +65,46 @@ func TestRootCmd_FileInput(t *testing.T) {
 
 func TestRootCmd_FileNotFound(t *testing.T) {
 	_, err := runRoot([]string{".", "/nonexistent/path/file.json"}, "")
+	assert.Error(t, err)
+}
+
+func TestRootCmd_SaveAndLoad(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	// Save input
+	out, err := runRoot([]string{"--save", ".name"}, `{"name":"saved","value":1}`)
+	require.NoError(t, err)
+	assert.Equal(t, "saved\n", out)
+
+	// Load saved input with different expression
+	out, err = runRoot([]string{"--load", ".value"}, "")
+	require.NoError(t, err)
+	assert.Equal(t, "1\n", out)
+}
+
+func TestRootCmd_LoadWithoutSave(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	_, err := runRoot([]string{"--load", "."}, "")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no saved input found")
+}
+
+func TestRootCmd_SaveOverwrite(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	_, err := runRoot([]string{"--save", "."}, `{"first":true}`)
+	require.NoError(t, err)
+
+	_, err = runRoot([]string{"--save", "."}, `{"second":true}`)
+	require.NoError(t, err)
+
+	out, err := runRoot([]string{"--load", "."}, "")
+	require.NoError(t, err)
+	assert.Equal(t, `{"second":true}`+"\n", out)
+}
+
+func TestRootCmd_SaveAndLoadMutuallyExclusive(t *testing.T) {
+	_, err := runRoot([]string{"--save", "--load", "."}, `{}`)
 	assert.Error(t, err)
 }
