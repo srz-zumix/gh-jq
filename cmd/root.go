@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	saveFlag bool
-	loadFlag bool
+	saveFlag  bool
+	loadFlag  bool
+	clearFlag bool
 )
 
 var rootCmd = &cobra.Command{
@@ -26,8 +27,17 @@ var rootCmd = &cobra.Command{
 	Short:   "A jq wrapper for GitHub CLI",
 	Long:    `gh-jq is a jq wrapper for GitHub CLI that processes JSON using jq expressions.`,
 	Version: version.Version,
-	Args:    cobra.MinimumNArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if clearFlag {
+			return nil
+		}
+		return cobra.MinimumNArgs(1)(cmd, args)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if clearFlag {
+			return store.Clear()
+		}
+
 		expr := args[0]
 		files := args[1:]
 
@@ -85,7 +95,8 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().BoolVarP(&saveFlag, "save", "S", false, "Save input JSON for later use with --load")
 	rootCmd.Flags().BoolVarP(&loadFlag, "load", "L", false, "Load previously saved JSON input")
-	rootCmd.MarkFlagsMutuallyExclusive("save", "load")
+	rootCmd.Flags().BoolVarP(&clearFlag, "clear", "C", false, "Clear previously saved JSON input")
+	rootCmd.MarkFlagsMutuallyExclusive("save", "load", "clear")
 }
 
 func Execute() {

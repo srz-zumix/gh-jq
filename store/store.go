@@ -54,3 +54,17 @@ func Load() ([]byte, error) {
 	}
 	return data, nil
 }
+
+// Clear removes the saved JSON file from the store.
+func Clear() error {
+	dir, err := DataDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(dir, defaultFileName)
+	err = os.Remove(path)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("cannot clear saved input: %w", err)
+	}
+	return nil
+}

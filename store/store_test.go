@@ -55,3 +55,24 @@ func TestSave_OverwritesExisting(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []byte(`{"second":true}`), loaded)
 }
+
+func TestClear(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	err := Save([]byte(`{"name":"test"}`))
+	require.NoError(t, err)
+
+	err = Clear()
+	require.NoError(t, err)
+
+	_, err = Load()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no saved input found")
+}
+
+func TestClear_NoSavedData(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	err := Clear()
+	assert.NoError(t, err)
+}
