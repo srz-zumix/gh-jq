@@ -85,6 +85,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().BoolVarP(&saveFlag, "save", "S", false, "Save input JSON for later use with --load")
 	rootCmd.Flags().BoolVarP(&loadFlag, "load", "L", false, "Load previously saved JSON input")
+	rootCmd.MarkFlagsMutuallyExclusive("save", "load")
 }
 
 func Execute() {

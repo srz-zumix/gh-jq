@@ -17,6 +17,8 @@ func runRoot(args []string, stdin string) (string, error) {
 	rootCmd.SetArgs(args)
 	saveFlag = false
 	loadFlag = false
+	rootCmd.Flags().Lookup("save").Changed = false
+	rootCmd.Flags().Lookup("load").Changed = false
 	err := rootCmd.Execute()
 	return outBuf.String(), err
 }
@@ -100,4 +102,9 @@ func TestRootCmd_SaveOverwrite(t *testing.T) {
 	out, err := runRoot([]string{"--load", "."}, "")
 	require.NoError(t, err)
 	assert.Equal(t, `{"second":true}`+"\n", out)
+}
+
+func TestRootCmd_SaveAndLoadMutuallyExclusive(t *testing.T) {
+	_, err := runRoot([]string{"--save", "--load", "."}, `{}`)
+	assert.Error(t, err)
 }
