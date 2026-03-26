@@ -17,8 +17,10 @@ func runRoot(args []string, stdin string) (string, error) {
 	rootCmd.SetArgs(args)
 	saveFlag = false
 	loadFlag = false
+	clearFlag = false
 	rootCmd.Flags().Lookup("save").Changed = false
 	rootCmd.Flags().Lookup("load").Changed = false
+	rootCmd.Flags().Lookup("clear").Changed = false
 	err := rootCmd.Execute()
 	return outBuf.String(), err
 }
@@ -106,5 +108,40 @@ func TestRootCmd_SaveOverwrite(t *testing.T) {
 
 func TestRootCmd_SaveAndLoadMutuallyExclusive(t *testing.T) {
 	_, err := runRoot([]string{"--save", "--load", "."}, `{}`)
+	assert.Error(t, err)
+}
+
+func TestRootCmd_Clear(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	// Save input first
+	_, err := runRoot([]string{"--save", "."}, `{"name":"saved"}`)
+	require.NoError(t, err)
+
+	// Clear saved input
+	_, err = runRoot([]string{"--clear"}, "")
+	require.NoError(t, err)
+
+	// Load should now fail
+	_, err = runRoot([]string{"--load", "."}, "")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no saved input found")
+}
+
+func TestRootCmd_ClearWithoutSave(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+
+	// Clear when nothing is saved should succeed
+	_, err := runRoot([]string{"--clear"}, "")
+	assert.NoError(t, err)
+}
+
+func TestRootCmd_ClearAndSaveMutuallyExclusive(t *testing.T) {
+	_, err := runRoot([]string{"--clear", "--save", "."}, `{}`)
+	assert.Error(t, err)
+}
+
+func TestRootCmd_ClearAndLoadMutuallyExclusive(t *testing.T) {
+	_, err := runRoot([]string{"--clear", "--load", "."}, `{}`)
 	assert.Error(t, err)
 }
