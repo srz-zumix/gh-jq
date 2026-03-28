@@ -18,9 +18,11 @@ func runRoot(args []string, stdin string) (string, error) {
 	saveFlag = false
 	loadFlag = false
 	clearFlag = false
-	rootCmd.Flags().Lookup("save").Changed = false
-	rootCmd.Flags().Lookup("load").Changed = false
-	rootCmd.Flags().Lookup("clear").Changed = false
+	nullInputFlag = false
+	slurpFlag = false
+	for _, name := range []string{"save", "load", "clear", "null-input", "slurp"} {
+		rootCmd.Flags().Lookup(name).Changed = false
+	}
 	err := rootCmd.Execute()
 	return outBuf.String(), err
 }
@@ -144,4 +146,47 @@ func TestRootCmd_ClearAndSaveMutuallyExclusive(t *testing.T) {
 func TestRootCmd_ClearAndLoadMutuallyExclusive(t *testing.T) {
 	_, err := runRoot([]string{"--clear", "--load", "."}, `{}`)
 	assert.Error(t, err)
+}
+
+func TestRootCmd_NullInput(t *testing.T) {
+	out, err := runRoot([]string{"--null-input", "1+1"}, "")
+	require.NoError(t, err)
+	assert.Equal(t, "2\n", out)
+}
+
+func TestRootCmd_NullInputExpression(t *testing.T) {
+	out, err := runRoot([]string{"-n", "{a:1,b:2}"}, "")
+	require.NoError(t, err)
+	assert.Equal(t, `{"a":1,"b":2}`+"\n", out)
+}
+
+func TestRootCmd_NullInputNull(t *testing.T) {
+	out, err := runRoot([]string{"-n", "."}, "")
+	require.NoError(t, err)
+	assert.Equal(t, "\n", out)
+}
+
+func TestRootCmd_Slurp(t *testing.T) {
+	out, err := runRoot([]string{"--slurp", "length"}, `{"a":1}`+"\n"+`{"b":2}`)
+	require.NoError(t, err)
+	assert.Equal(t, "2\n", out)
+}
+
+func TestRootCmd_SlurpArray(t *testing.T) {
+	out, err := runRoot([]string{"-s", "."}, `1`+"\n"+`2`+"\n"+`3`)
+	require.NoError(t, err)
+	assert.Equal(t, "[1,2,3]\n", out)
+}
+
+func TestRootCmd_SlurpSingle(t *testing.T) {
+	out, err := runRoot([]string{"-s", "."}, `{"x":1}`)
+	require.NoError(t, err)
+	assert.Equal(t, `[{"x":1}]`+"\n", out)
+}
+
+func TestRootCmd_NullInputWithSlurp(t *testing.T) {
+	// --null-input takes precedence over --slurp
+	out, err := runRoot([]string{"-n", "-s", "."}, "")
+	require.NoError(t, err)
+	assert.Equal(t, "\n", out)
 }
