@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/cli/go-gh/v2/pkg/jq"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/srz-zumix/gh-jq/store"
@@ -20,6 +19,16 @@ var (
 	saveFlag  bool
 	loadFlag  bool
 	clearFlag bool
+
+	nullInputFlag      bool
+	rawInputFlag       bool
+	slurpFlag          bool
+	argFlag            map[string]string
+	argjsonFlag        map[string]string
+	slurpfileFlag      map[string]string
+	rawfileFlag        map[string]string
+	argsFlag           []string
+	jsonargsFlag       []string
 )
 
 var rootCmd = &cobra.Command{
@@ -88,7 +97,18 @@ var rootCmd = &cobra.Command{
 		}
 		colorize := isTTY
 
-		return jq.EvaluateFormatted(input, out, expr, indent, colorize)
+		opts := &evalOptions{
+			nullInput:          nullInputFlag,
+			rawInput:           rawInputFlag,
+			slurp:              slurpFlag,
+			args:               argFlag,
+			argjson:            argjsonFlag,
+			slurpfile:          slurpfileFlag,
+			rawfile:            rawfileFlag,
+			positionalArgs:     argsFlag,
+			positionalJSONArgs: jsonargsFlag,
+		}
+		return evaluateFormatted(input, out, expr, indent, colorize, opts)
 	},
 }
 
@@ -97,6 +117,16 @@ func init() {
 	rootCmd.Flags().BoolVarP(&loadFlag, "load", "L", false, "Load previously saved JSON input")
 	rootCmd.Flags().BoolVarP(&clearFlag, "clear", "C", false, "Clear previously saved JSON input")
 	rootCmd.MarkFlagsMutuallyExclusive("save", "load", "clear")
+
+	rootCmd.Flags().BoolVarP(&nullInputFlag, "null-input", "n", false, "Use null as the single input value")
+	rootCmd.Flags().BoolVarP(&rawInputFlag, "raw-input", "R", false, "Read each line of input as a string")
+	rootCmd.Flags().BoolVarP(&slurpFlag, "slurp", "s", false, "Read all inputs into an array")
+	rootCmd.Flags().StringToStringVar(&argFlag, "arg", nil, "Set variable $name to string value (format: name=value)")
+	rootCmd.Flags().StringToStringVar(&argjsonFlag, "argjson", nil, "Set variable $name to JSON value (format: name=value)")
+	rootCmd.Flags().StringToStringVar(&slurpfileFlag, "slurpfile", nil, "Set $name to array of JSON values from file (format: name=file)")
+	rootCmd.Flags().StringToStringVar(&rawfileFlag, "rawfile", nil, "Set $name to string contents of file (format: name=file)")
+	rootCmd.Flags().StringArrayVar(&argsFlag, "args", nil, "Append positional string argument to $ARGS.positional")
+	rootCmd.Flags().StringArrayVar(&jsonargsFlag, "jsonargs", nil, "Append positional JSON argument to $ARGS.positional")
 }
 
 func Execute() {
