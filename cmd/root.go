@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/cli/go-gh/v2/pkg/jq"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/srz-zumix/gh-jq/store"
@@ -20,6 +19,9 @@ var (
 	saveFlag  bool
 	loadFlag  bool
 	clearFlag bool
+
+	nullInputFlag bool
+	slurpFlag     bool
 )
 
 var rootCmd = &cobra.Command{
@@ -42,7 +44,9 @@ var rootCmd = &cobra.Command{
 		files := args[1:]
 
 		var input io.Reader
-		if loadFlag {
+		if nullInputFlag {
+			// --null-input: do not read any input; evaluateFormatted will use null
+		} else if loadFlag {
 			data, err := store.Load()
 			if err != nil {
 				return err
@@ -88,7 +92,7 @@ var rootCmd = &cobra.Command{
 		}
 		colorize := isTTY
 
-		return jq.EvaluateFormatted(input, out, expr, indent, colorize)
+		return evaluateFormatted(input, out, expr, indent, colorize, nullInputFlag, slurpFlag)
 	},
 }
 
@@ -97,6 +101,9 @@ func init() {
 	rootCmd.Flags().BoolVarP(&loadFlag, "load", "L", false, "Load previously saved JSON input")
 	rootCmd.Flags().BoolVarP(&clearFlag, "clear", "C", false, "Clear previously saved JSON input")
 	rootCmd.MarkFlagsMutuallyExclusive("save", "load", "clear")
+
+	rootCmd.Flags().BoolVarP(&nullInputFlag, "null-input", "n", false, "Use null as the single input value")
+	rootCmd.Flags().BoolVarP(&slurpFlag, "slurp", "s", false, "Read all inputs into an array")
 }
 
 func Execute() {
