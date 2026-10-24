@@ -1,0 +1,4 @@
+# markdownlint configuration
+# https://github.com/DavidAnson/markdownlint
+MD013:
+  tables: false
