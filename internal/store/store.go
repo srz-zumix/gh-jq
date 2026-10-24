@@ -1,6 +1,8 @@
 /*
 Copyright © 2025 srz_zumix
 */
+
+// Package store persists JSON input for the --save, --load and --clear options.
 package store
 
 import (
@@ -15,10 +17,13 @@ const (
 	filePerm        = 0600
 )
 
+// userConfigDir is a variable so that tests can redirect the config directory.
+var userConfigDir = os.UserConfigDir
+
 // DataDir returns the directory used to store saved JSON data.
 // It uses the user's config directory (e.g., ~/.config/gh-jq).
 func DataDir() (string, error) {
-	configDir, err := os.UserConfigDir()
+	configDir, err := userConfigDir()
 	if err != nil {
 		return "", fmt.Errorf("cannot determine config directory: %w", err)
 	}
