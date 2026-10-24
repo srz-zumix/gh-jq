@@ -1,4 +1,5 @@
-package cmd
+// Package evaluate pre-processes JSON input and evaluates jq expressions.
+package evaluate
 
 import (
 	"bytes"
@@ -32,9 +33,9 @@ func slurpInput(r io.Reader) (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
-// evaluateFormatted pre-processes input based on the provided flags, then
+// EvaluateFormatted pre-processes input based on the provided flags, then
 // delegates to jq.EvaluateFormatted for expression evaluation.
-func evaluateFormatted(input io.Reader, output io.Writer, expr string, indent string, colorize bool, nullInput bool, slurp bool) error {
+func EvaluateFormatted(input io.Reader, output io.Writer, expr string, indent string, colorize bool, nullInput bool, slurp bool) error {
 	if nullInput {
 		input = strings.NewReader("null")
 	} else if slurp {

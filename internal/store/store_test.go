@@ -9,8 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// setConfigDir redirects the config directory to a temporary directory for the test.
+func setConfigDir(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	orig := userConfigDir
+	userConfigDir = func() (string, error) { return dir, nil }
+	t.Cleanup(func() { userConfigDir = orig })
+	return dir
+}
+
 func TestSaveAndLoad(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	setConfigDir(t)
 
 	data := []byte(`{"name":"test","value":42}`)
 	err := Save(data)
@@ -22,7 +32,7 @@ func TestSaveAndLoad(t *testing.T) {
 }
 
 func TestLoad_NoSavedData(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	setConfigDir(t)
 
 	_, err := Load()
 	assert.Error(t, err)
@@ -30,8 +40,7 @@ func TestLoad_NoSavedData(t *testing.T) {
 }
 
 func TestSave_CreatesDirectory(t *testing.T) {
-	tmpDir := t.TempDir()
-	t.Setenv("XDG_CONFIG_HOME", tmpDir)
+	tmpDir := setConfigDir(t)
 
 	data := []byte(`{"key":"value"}`)
 	err := Save(data)
@@ -43,7 +52,7 @@ func TestSave_CreatesDirectory(t *testing.T) {
 }
 
 func TestSave_OverwritesExisting(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	setConfigDir(t)
 
 	err := Save([]byte(`{"first":true}`))
 	require.NoError(t, err)
@@ -57,7 +66,7 @@ func TestSave_OverwritesExisting(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	setConfigDir(t)
 
 	err := Save([]byte(`{"name":"test"}`))
 	require.NoError(t, err)
@@ -71,7 +80,7 @@ func TestClear(t *testing.T) {
 }
 
 func TestClear_NoSavedData(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	setConfigDir(t)
 
 	err := Clear()
 	assert.NoError(t, err)

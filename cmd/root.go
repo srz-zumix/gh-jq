@@ -11,7 +11,8 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
-	"github.com/srz-zumix/gh-jq/store"
+	"github.com/srz-zumix/gh-jq/internal/evaluate"
+	"github.com/srz-zumix/gh-jq/internal/store"
 	"github.com/srz-zumix/gh-jq/version"
 )
 
@@ -45,7 +46,7 @@ var rootCmd = &cobra.Command{
 
 		var input io.Reader
 		if nullInputFlag {
-			// --null-input: do not read any input; evaluateFormatted will use null
+			// --null-input: do not read any input; evaluate.EvaluateFormatted will use null
 		} else if loadFlag {
 			data, err := store.Load()
 			if err != nil {
@@ -92,7 +93,7 @@ var rootCmd = &cobra.Command{
 		}
 		colorize := isTTY
 
-		return evaluateFormatted(input, out, expr, indent, colorize, nullInputFlag, slurpFlag)
+		return evaluate.EvaluateFormatted(input, out, expr, indent, colorize, nullInputFlag, slurpFlag)
 	},
 }
 
