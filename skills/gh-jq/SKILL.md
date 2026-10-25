@@ -95,7 +95,7 @@ completion is generated; when invoked as `gh-jq`, a standard completion script
 is generated.
 
 ```bash
-gh jq completion --shell bash|zsh|fish|powershell
+gh jq completion --shell bash
 ```
 
 | Option | Default | Description |
@@ -112,9 +112,12 @@ Install and manage the agent skills bundled with gh-jq.
 
 ```bash
 gh jq skills list
-gh jq skills install|update|reinstall|uninstall|status \
-  [-scope user|repo] [-prefix DIR] [-dry-run] [-force]
+gh jq skills install
+gh jq skills install -scope repo -dry-run
+gh jq skills status
 ```
+
+Subcommands: `list`, `install`, `update`, `reinstall`, `uninstall`, `status`.
 
 | Option | Default | Description |
 | --- | --- | --- |
