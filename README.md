@@ -102,3 +102,26 @@ See [Shell Completion](#shell-completion) for setup instructions.
 | Flag | Short | Default | Description |
 | ---- | ----- | ------- | ----------- |
 | `--shell` | `-s` | (required) | Shell type: `bash`, `zsh`, `fish` or `powershell` |
+
+---
+
+### skills
+
+#### Manage the bundled agent skills
+
+```sh
+gh jq skills list
+gh jq skills install
+gh jq skills install -scope repo -dry-run
+gh jq skills status
+```
+
+Install and manage the agent skills bundled with gh-jq.
+Subcommands: `list`, `install`, `update`, `reinstall`, `uninstall`, `status`.
+
+| Flag | Default | Description |
+| ---- | ------- | ----------- |
+| `-dry-run` | `false` | Print what would happen without making changes |
+| `-force` | `false` | Overwrite unmanaged skills |
+| `-prefix` | - | Skill installation directory (overrides `-scope`) |
+| `-scope` | `user` | `user` (`~/.agents/skills`) or `repo` (`<repo-root>/.agents/skills`) |
