@@ -85,7 +85,7 @@ gh jq --list
 `--save`, `--load`, `--clear` and `--list` are mutually exclusive.
 `--save` cannot be combined with `--null-input`.
 
-Channel names are values, so write `--save=<channel>` (or `-S<channel>`), not
+Channel names are values, so write `--save=<channel>` (or `-S=<channel>`), not
 `--save <channel>`. A channel name may contain only lowercase letters, digits,
 `-` and `_`.
 

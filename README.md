@@ -62,7 +62,7 @@ as `last-input.json`; other channels are stored in the `channels` subdirectory.
 `--save`, `--load`, `--clear` and `--list` are mutually exclusive.
 `--save` cannot be combined with `--null-input`.
 
-Channel names are passed as values, so use `--save=<channel>` (or `-S<channel>`)
+Channel names are passed as values, so use `--save=<channel>` (or `-S=<channel>`)
 rather than `--save <channel>`. A bare `--save` or `--load` uses `default`.
 
 | Flag | Short | Default | Description |
@@ -89,8 +89,8 @@ gh api repos/cli/cli/releases | gh jq --save '.[0].tag_name'
 gh jq --load '.[].name'
 
 # Keep separate channels for different responses
-gh api repos/cli/releases | gh jq --save=releases '.[0].tag_name'
-gh api repos/cli/issues | gh jq --save=issues 'length'
+gh api repos/cli/cli/releases | gh jq --save=releases '.[0].tag_name'
+gh api repos/cli/cli/issues | gh jq --save=issues 'length'
 gh jq --load=releases '.[].name'
 gh jq --list
 gh jq --clear=issues
