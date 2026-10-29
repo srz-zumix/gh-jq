@@ -38,40 +38,6 @@ var rootCmd = &cobra.Command{
 		return cobra.MinimumNArgs(1)(cmd, args)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-<<<<<<< Updated upstream
-		if listFlag {
-			names, err := store.List()
-			if err != nil {
-				return err
-			}
-			for _, name := range names {
-				fmt.Fprintln(cmd.OutOrStdout(), name)
-			}
-			return nil
-		}
-		if cmd.Flags().Changed("clear") {
-			return store.Clear(clearChannel)
-||||||| Stash base
-		if clearFlag {
-			return store.Clear()
-=======
-<<<<<<< Updated upstream
-		if clearFlag {
-			return store.Clear()
-||||||| Stash base
-		if listFlag {
-			names, err := store.List()
-			if err != nil {
-				return err
-			}
-			for _, name := range names {
-				fmt.Fprintln(cmd.OutOrStdout(), name)
-			}
-			return nil
-		}
-		if cmd.Flags().Changed("clear") {
-			return store.Clear(clearChannel)
-=======
 		if listFlag {
 			names, err := store.List()
 			if err != nil {
@@ -86,8 +52,6 @@ var rootCmd = &cobra.Command{
 		}
 		if cmd.Flags().Changed("clear") {
 			return store.Clear(clearChannel)
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 		}
 
 		expr := args[0]
